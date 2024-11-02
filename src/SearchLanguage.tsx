@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Combobox,
   Option,
@@ -6,6 +6,7 @@ import {
   makeStyles,
   shorthands,
 } from "@fluentui/react-components";
+import { LanguageDto } from './types/LanguageDto';
 
 const useStyles = makeStyles({
   container: {
@@ -28,33 +29,36 @@ const useStyles = makeStyles({
   }
 });
 
-const languageOptions:string[] = [
-  'Java', 'JavaScript', 'TypeScript', 'Golang', 'Rust'
-];
-const includes = (text1:string, text2:string) => {
+const includes = (text1: string, text2: string) => {
   return text1.toUpperCase().includes(text2.toUpperCase());
 }
-const includesInList = (list:string[], text: string) => {
-  return list.some(option => includes(option, text));
+const includesInList = (list: LanguageDto[], text: string) => {
+  return list.some(option => includes(option.name, text));
 }
-export default function SearchLanguage() {
+export default function SearchLanguage({languageOptions, selectedLanguage, setSelectedLanguage, handleSlectedOption}: 
+  {languageOptions: LanguageDto[], selectedLanguage: LanguageDto | null, setSelectedLanguage:(language:LanguageDto |null) => void,  handleSlectedOption: (language: LanguageDto) => void}) {
+  
+  
   const styles = useStyles();
-  const [selectedLanguage, setSelectedLanguage] = useState<string>('');
   const [searchText, setSearchText] = useState<string>('');
   const [isTyping, setIsTyping] = useState<boolean>(false);
 
+  useEffect(() => {
+    if (selectedLanguage) {
+      setSearchText(selectedLanguage.name);
+    }
+  }, [selectedLanguage]);
+
   const filteredLanguage = isTyping ?
     languageOptions.filter(option => searchText === ''
-      || includes(option, (searchText || ''))
+      || includes(option.name, (searchText || ''))
     ) : languageOptions;
 
 
   const handleComboboxOnChange = (value: string) => {
+    console.log("combobox onChange: " + value);
     setIsTyping(true);
     setSearchText(value);
-    if (!value) {
-      setSelectedLanguage('');
-    }
   }
 
   return (
@@ -64,42 +68,53 @@ export default function SearchLanguage() {
         <Label className={styles.label}>language</Label>
         <Combobox
           className={styles.input}
-          selectedOptions={selectedLanguage ? [selectedLanguage] : []}
           onOptionSelect={(_, data) => {
-            setSelectedLanguage(data.selectedOptions[0]);
-            setSearchText(data.selectedOptions[0]);
+            if(!data.optionValue) {
+              return;
+            }
+            const selected = languageOptions.find(lang => lang.id === data.optionValue);
+            if (!selected) {
+              return;
+            }
+            handleSlectedOption(selected);
+            setSearchText(selected.name);
             setIsTyping(false);
           }}
           value={searchText || ''}
           onChange={(e) => handleComboboxOnChange(e.target.value)}
-          onBlur={() => {
+          onBlur={(e) => {
+            console.log(e.target.value);
             if (!includesInList(languageOptions, searchText)) {
               setSearchText('');
+              setSelectedLanguage(null);
             } else {
-              setSelectedLanguage(languageOptions.find(option => includes(option, searchText)) || '');
+              setSelectedLanguage(languageOptions.find(option => includes(option.name, e.target.value)) || null);
             }
             setIsTyping(false);
           }}
+
           onKeyDown={(e) => {
+            console.log("key pressed: " + e.key);
+            console.log("search text: " + searchText);
+            // if enter key is pressed and the search text is not in the list, clear the search text  
             if (e.key === 'Enter' && !includesInList(languageOptions, searchText)) {
               setIsTyping(false);
-              console.log(languageOptions);
-              console.log(searchText);
-              setSelectedLanguage('');
+              setSelectedLanguage(null);
               setSearchText('');
             }
           }}
         >
           {filteredLanguage.map((option) => (
-            <Option key={option} value={option}>
-              {option}
+            <Option key={option.id} value={option.id}
+            >
+              {option.name}
             </Option>
           ))}
         </Combobox>
-        <div>{"hello "}  {selectedLanguage && <span>{selectedLanguage}</span>}</div>
-        
+        <div>{"hello "}  {selectedLanguage && <span>{selectedLanguage.name}</span>}</div>
+
       </div>
-      
+
 
     </div>
 
