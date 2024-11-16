@@ -5,7 +5,7 @@ import { LanguageDto } from "./types/LanguageDto";
 import { useEffect, useState } from "react";
 
 
-const Language = () => {
+const LanguageSelection = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDto | null>(null);
   const [languageOptions, setLanguageOptions] = useState<LanguageDto[]>([]);
   useEffect(() => {
@@ -51,4 +51,4 @@ const Language = () => {
   );
 };
 
-export default Language;
+export default LanguageSelection;

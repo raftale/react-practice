@@ -1,9 +1,13 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import FluentUIWrapper from './FluentUIWrapper.tsx';
+import LanguageSelection from './LanguageSelection.tsx';
+import Messenger from './react-dev-demo/use-reducer/Messenger.jsx'
+import HeadPage from './react-dev-demo/use-context/HeadPage.jsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <FluentUIWrapper />
+    {/* <LanguageSelection /> */}
+    {/* <Messenger /> */}
+    <HeadPage />
   </StrictMode>,
 )
